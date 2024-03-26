@@ -41,6 +41,7 @@ The simplest version would be:
     $ ./rcam-server.py -m 1
     listening at tcp://127.0.0.1:8089
     listening at tcp://192.168.1.37:8089
+    listening at tcp://10.42.0.1:8089
     pub_server: start
     api_server: start
 
@@ -66,7 +67,10 @@ image metadata displayed on the right.
 ![MainWindow](docs/main-window.png "Main Window")
 
 You can toggle between fitting the image by cropping and scaling. You can also manually adjust the exposure and the
-focus (if you have one of the v3 camera modules). The controls are all available in the menus with shortcuts
+focus (if you have one of the v3 camera modules). The controls are all available in the menus with shortcuts.
+
+There is also a histogram view. It generates the histogram based on the central window of the image. I find it 
+useful (sometimes) when manually setting the exposure,
 
 ## Optional Setup
 
@@ -75,9 +79,8 @@ focus (if you have one of the v3 camera modules). The controls are all available
 I often use this where this no wifi network so I have setup the wifi on the Pi to be a hotspot. When I'm at home,
 I use the wired interface, but out and about, I connect my laptop to the hotspot.
 
-It's very easy to do with network manager:
-
-    https://www.raspberrypi.com/documentation/computers/configuration.html#host-a-wireless-network-on-your-raspberry-pi
+It's very easy to do with network manager as described
+[here](https://www.raspberrypi.com/documentation/computers/configuration.html#host-a-wireless-network-on-your-raspberry-pi)
 
 To create the hotspot:
 
@@ -97,5 +100,5 @@ And now you can enable autoconnect for your hotspot.
 
     $ sudo nmcli conn modify <con-name> autoconnect yes
 
-Once this is done, the hotspot will be available after booting.
+Once this is done, the hotspot will start on boot.
 
