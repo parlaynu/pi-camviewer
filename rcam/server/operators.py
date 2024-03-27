@@ -46,13 +46,16 @@ def capture(pipe, camera, arrays):
 
         # build the item to yield
         item['metadata'] = metadata
+        item['metadata']['CameraModel'] = camera.camera_properties['Model']
+        item['metadata']['ImageSize'] = camera.camera_config['main']['size']
+        
     
         item['main'] = {
             'image': images[0],
             'format': camera.camera_config['main']['format'],
             'framesize': camera.camera_config['main']['framesize'],
             'size': camera.camera_config['main']['size'],
-            'stride': camera.camera_config['main']['stride'],
+            'stride': camera.camera_config['main']['stride']
         }
 
         yield item
@@ -78,6 +81,7 @@ def focus(pipe, camera):
                 local_ctrls['AfMode'] = controls.AfModeEnum.Auto
                 local_ctrls['AfTrigger'] = controls.AfTriggerEnum.Start
             else:
+                af_enable = False
                 local_ctrls['AfMode'] = controls.AfModeEnum.Manual
         
         if ctrls.get('AfTrigger', False):
@@ -113,7 +117,7 @@ def exposure(pipe, camera):
 
         # insert the AeEnable item into the metadata
         metadata = item['metadata']
-        metadata['AeEnable'] = metadata.get('AeEnable', ae_enable)
+        metadata['AeEnable'] = ae_enable = local_ctrls.get('AeEnable', ae_enable)
         
         yield item
 
