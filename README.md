@@ -79,7 +79,7 @@ useful (sometimes) when manually setting the exposure.
 ### Pi Hotspot
 
 I often use this where this no wifi network so I have setup the wifi on the Pi to be a hotspot. When I'm at home,
-I use the wired interface, but out and about, I connect my laptop to the hotspot.
+I connect the Pi to my network using the wired interface, but out and about, I connect my laptop to the hotspot.
 
 It's very easy to do with network manager as described
 [here](https://www.raspberrypi.com/documentation/computers/configuration.html#host-a-wireless-network-on-your-raspberry-pi)
@@ -93,8 +93,9 @@ For example:
     $ sudo nmcli device wifi hotspot band bg con-name piwifi ssid piwifi password mysupersecretpassword
 
 You will probably want to have this start automatically at boot time. First, turn off 'autoconnect' for any
-existing wifi networks you might have. If you setup your Pi with the official imager application and setup
-connection to a wifi network, there will be a connection called 'preconfigured' 
+existing wifi networks you might have. If you set your Pi up with the official imager application and configured
+a connection to a wifi network, there will be a connection called 'preconfigured'. Disable the connection
+using this:
 
     $ sudo nmcli conn modify preconfigured autoconnect no
 
