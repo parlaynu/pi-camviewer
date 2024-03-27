@@ -1,8 +1,8 @@
 psutil
 pyzmq==24.0.1
+piexif
 numpy
 pillow
 
 # to run the qt gui applications
 pyside6==6.6.2
-
