@@ -102,9 +102,28 @@ def focus(pipe, camera):
         yield item
 
 
+def colour(pipe, camera):
+    local_keys = {'AwbEnable', 'ColourGains'}
+    
+    awb_enable = True
+    
+    for item in pipe:
+        # set the controls
+        ctrls = item['controls']
+        local_ctrls = { k: ctrls[k] for k in local_keys & ctrls.keys() }
+        if len(local_ctrls):
+            camera.set_controls(local_ctrls)
+
+        # insert the AeEnable item into the metadata
+        metadata = item['metadata']
+        metadata['AwbEnable'] = awb_enable = local_ctrls.get('AwbEnable', awb_enable)
+        
+        yield item
+
+    
 def exposure(pipe, camera):
     # the controls managed in this operator
-    local_keys = {'AeEnable', 'AwbEnable', 'AnalogueGain', 'ExposureTime'}
+    local_keys = {'AeEnable', 'AnalogueGain', 'ExposureTime'}
     
     ae_enable = True
     
@@ -143,6 +162,8 @@ def publisher(pipe, pub_sock, svr_socket):
     exposure_time = 0
     analogue_gain = 0.0
     lens_position = 0.0
+    red_gain = 0.0
+    blue_gain = 0.0
 
     for item in pipe:
         idx = item['idx']
@@ -174,6 +195,14 @@ def publisher(pipe, pub_sock, svr_socket):
         
         if lens_position != metadata.get('LensPosition', 0.0):
             lens_position = updates['LensPosition'] = metadata['LensPosition']
+
+        cur_red_gain, cur_blue_gain = metadata.get('ColourGains', (0.0, 0.0))
+        cur_red_gain = round(cur_red_gain, 2)
+        cur_blue_gain = round(cur_blue_gain, 2)
+        if red_gain != cur_red_gain:
+            red_gain = updates['RedGain'] = cur_red_gain
+        if blue_gain != cur_blue_gain:
+            blue_gain = updates['BlueGain'] = cur_blue_gain
         
         if len(updates):
             svr_socket.send_pyobj(updates)

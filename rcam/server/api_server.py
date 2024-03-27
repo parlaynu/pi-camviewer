@@ -18,6 +18,9 @@ class ApiServer(threading.Thread):
         self.analogue_gain = None
         self.exposure_time = None
         self.lens_position = None
+        
+        self.red_gain = None
+        self.blue_gain = None
 
         self.min_ag = min_ag
         self.max_ag = max_ag
@@ -31,18 +34,24 @@ class ApiServer(threading.Thread):
         
         self.api_handlers = {
             ApiCommands.SHUTDOWN: self.handle_shutdown,
-            ApiCommands.SET_SIZE: self.handle_set_size,
+            ApiCommands.AUTOFOCUS_ENABLE: self.handle_af_enable,
+            ApiCommands.AUTOFOCUS_DISABLE: self.handle_af_disable,
+            ApiCommands.AUTOFOCUS_RUN: self.handle_af_run,
+            ApiCommands.LENS_POSITION_INCREASE: self.handle_lp_increase,
+            ApiCommands.LENS_POSITION_DECREASE: self.handle_lp_decrease,
             ApiCommands.AUTOEXPOSURE_ENABLE: self.handle_ae_enable,
             ApiCommands.AUTOEXPOSURE_DISABLE: self.handle_ae_disable,
             ApiCommands.ANALOGUE_GAIN_INCREASE: self.handle_ag_increase,
             ApiCommands.ANALOGUE_GAIN_DECREASE: self.handle_ag_decrease,
             ApiCommands.EXPOSURE_TIME_INCREASE: self.handle_et_increase,
             ApiCommands.EXPOSURE_TIME_DECREASE: self.handle_et_decrease,
-            ApiCommands.AUTOFOCUS_ENABLE: self.handle_af_enable,
-            ApiCommands.AUTOFOCUS_DISABLE: self.handle_af_disable,
-            ApiCommands.AUTOFOCUS_RUN: self.handle_af_run,
-            ApiCommands.LENS_POSITION_INCREASE: self.handle_lp_increase,
-            ApiCommands.LENS_POSITION_DECREASE: self.handle_lp_decrease,
+            ApiCommands.AUTO_WHITE_BALANCE_ENABLE: self.handle_awb_enable,
+            ApiCommands.AUTO_WHITE_BALANCE_DISABLE: self.handle_awb_disable,
+            ApiCommands.RED_GAIN_INCREASE: self.handle_rg_increase,
+            ApiCommands.RED_GAIN_DECREASE: self.handle_rg_decrease,
+            ApiCommands.BLUE_GAIN_INCREASE: self.handle_bg_increase,
+            ApiCommands.BLUE_GAIN_DECREASE: self.handle_bg_decrease,
+            ApiCommands.SET_SIZE: self.handle_set_size,
             ApiCommands.FIT_NONE: self.handle_fit_none,
             ApiCommands.FIT_SCALED: self.handle_fit_scaled,
             ApiCommands.FIT_CROPPED: self.handle_fit_cropped,
@@ -71,6 +80,8 @@ class ApiServer(threading.Thread):
         self.exposure_time = updates.get('ExposureTime', self.exposure_time)
         self.analogue_gain = updates.get('AnalogueGain', self.analogue_gain)
         self.lens_position = updates.get('LensPosition', self.lens_position)
+        self.red_gain = updates.get('RedGain', self.red_gain)
+        self.blue_gain = updates.get('BlueGain', self.blue_gain)
 
     def handle_shutdown(self, body):
         controls = {
@@ -79,19 +90,40 @@ class ApiServer(threading.Thread):
         self.svr_sock.send_pyobj(controls)
         self.over = True
         
-    def handle_set_size(self, body):
-        body = body.decode('utf-8')
-        width, height = [int(x) for x in body.split('x')]
+    def handle_af_enable(self, body):
         controls = {
-            'Width': width,
-            'Height': height
+            'AfEnable': True
         }
         self.svr_sock.send_pyobj(controls)
     
+    def handle_af_disable(self, body):
+        controls = {
+            'AfEnable': False
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_af_run(self, body):
+        controls = {
+            'AfTrigger': True
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_lp_increase(self, body):
+        if self.lens_position is None:
+            return
+        
+        controls = {
+            'LensPosition': self.lens_position*1.1
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_lp_decrease(self, body):
+        if self.lens_position is None:
+            return
+
     def handle_ae_enable(self, body):
         controls = {
-            'AeEnable': True,
-            'AwbEnable': True
+            'AeEnable': True
         }
         self.svr_sock.send_pyobj(controls)
     
@@ -145,48 +177,75 @@ class ApiServer(threading.Thread):
         
         controls = {
             'AeEnable': False,
-            'AwbEnable': False,
             'AnalogueGain': self.analogue_gain,
             'ExposureTime': self.exposure_time,
         }
         self.svr_sock.send_pyobj(controls)
 
-    def handle_af_enable(self, body):
-        controls = {
-            'AfEnable': True
-        }
-        self.svr_sock.send_pyobj(controls)
-    
-    def handle_af_disable(self, body):
-        controls = {
-            'AfEnable': False
-        }
-        self.svr_sock.send_pyobj(controls)
-
-    def handle_af_run(self, body):
-        controls = {
-            'AfTrigger': True
-        }
-        self.svr_sock.send_pyobj(controls)
-
-    def handle_lp_increase(self, body):
-        if self.lens_position is None:
-            return
-        
-        controls = {
-            'LensPosition': self.lens_position*1.1
-        }
-        self.svr_sock.send_pyobj(controls)
-
-    def handle_lp_decrease(self, body):
-        if self.lens_position is None:
-            return
 
         controls = {
             'LensPosition': self.lens_position*0.9
         }
         self.svr_sock.send_pyobj(controls)
 
+    def handle_awb_enable(self, body):
+        controls = {
+            'AwbEnable': True
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_awb_disable(self, body):
+        controls = {
+            'AwbEnable': False
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_rg_increase(self, body):
+        if self.red_gain is None:
+            return
+
+        controls = {
+            'AwbEnable': False,
+            'ColourGains': (self.red_gain*1.1, self.blue_gain)
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_rg_decrease(self, body):
+        if self.red_gain is None:
+            return
+        controls = {
+            'AwbEnable': False,
+            'ColourGains': (self.red_gain*0.9, self.blue_gain)
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_bg_increase(self, body):
+        if self.blue_gain is None:
+            return
+        controls = {
+            'AwbEnable': False,
+            'ColourGains': (self.red_gain, self.blue_gain*1.1)
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_bg_decrease(self, body):
+        if self.blue_gain is None:
+            return
+        controls = {
+            'AwbEnable': False,
+            'ColourGains': (self.red_gain, self.blue_gain*0.9)
+        }
+        self.svr_sock.send_pyobj(controls)
+
+    def handle_set_size(self, body):
+        body = body.decode('utf-8')
+        width, height = [int(x) for x in body.split('x')]
+        controls = {
+            'Width': width,
+            'Height': height
+        }
+        self.svr_sock.send_pyobj(controls)
+    
     def handle_fit_none(self, body):
         controls = {
             'FitMode': 'none'

@@ -2,7 +2,8 @@ from itertools import count
 import threading
 import zmq
 
-from .operators import control, focus, exposure, capture, jpeg_encoder, publisher
+from .operators import control, capture, jpeg_encoder, publisher
+from .operators import focus, exposure, colour
 from .operators import fit_scaled, fit_cropped
 
 
@@ -31,6 +32,7 @@ class PubServer(threading.Thread):
         pipe = capture(pipe, self.camera, self.arrays)
         pipe = focus(pipe, self.camera)
         pipe = exposure(pipe, self.camera)
+        pipe = colour(pipe, self.camera)
         pipe = fit_cropped(pipe, enabled=False)
         pipe = fit_scaled(pipe, enabled=True)
         pipe = jpeg_encoder(pipe)

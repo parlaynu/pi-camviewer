@@ -160,13 +160,17 @@ class MainWindow(QMainWindow):
         metajson = json.dumps(self.metadata, sort_keys=True, indent=4)
         self.metaview.setText(metajson)
         
+        if (af_enabled := self.metadata.get('AfEnable', None)) is not None:
+            if af_enabled != self.af_action.isChecked():
+                self.af_action.setChecked(af_enabled)
+
         if (ae_enabled := self.metadata.get('AeEnable', None)) is not None:
             if ae_enabled != self.ae_action.isChecked():
                 self.ae_action.setChecked(ae_enabled)
 
-        if (af_enabled := self.metadata.get('AfEnable', None)) is not None:
-            if af_enabled != self.af_action.isChecked():
-                self.af_action.setChecked(af_enabled)
+        if (awb_enabled := self.metadata.get('AwbEnable', None)) is not None:
+            if awb_enabled != self.awb_action.isChecked():
+                self.awb_action.setChecked(awb_enabled)
 
     @Slot(int, np.ndarray)
     def update_image(self, idx, image):
@@ -217,6 +221,22 @@ class MainWindow(QMainWindow):
             self.cam_api.fit_cropped()
 
     @Slot(bool)
+    def auto_focus(self, af_enable):
+        self.cam_api.auto_focus(af_enable)
+    
+    @Slot()
+    def run_autofocus(self):
+        self.cam_api.run_autofocus()
+    
+    @Slot()
+    def increase_lens_position(self):
+        self.cam_api.increase_lens_position()
+    
+    @Slot()
+    def decrease_lens_position(self):
+        self.cam_api.decrease_lens_position()
+
+    @Slot(bool)
     def auto_exposure(self, ae_enable):
         self.cam_api.auto_exposure(ae_enable)
 
@@ -245,20 +265,28 @@ class MainWindow(QMainWindow):
         self.cam_api.gain_decrease(self.locked)
 
     @Slot(bool)
-    def auto_focus(self, af_enable):
-        self.cam_api.auto_focus(af_enable)
-    
+    def auto_whitebalance(self, awb_enable):
+        self.cam_api.auto_whitebalance(awb_enable)
+
     @Slot()
-    def run_autofocus(self):
-        self.cam_api.run_autofocus()
-    
+    def increase_red_gain(self):
+        self.awb_action.setChecked(False)
+        self.cam_api.red_gain_increase()
+
     @Slot()
-    def increase_lens_position(self):
-        self.cam_api.increase_lens_position()
-    
+    def decrease_red_gain(self):
+        self.awb_action.setChecked(False)
+        self.cam_api.red_gain_decrease()
+
     @Slot()
-    def decrease_lens_position(self):
-        self.cam_api.decrease_lens_position()
+    def increase_blue_gain(self):
+        self.awb_action.setChecked(False)
+        self.cam_api.blue_gain_increase()
+
+    @Slot()
+    def decrease_blue_gain(self):
+        self.awb_action.setChecked(False)
+        self.cam_api.blue_gain_decrease()
 
     @Slot()
     def stop_thread(self):
@@ -314,8 +342,9 @@ class MainWindow(QMainWindow):
         # build the menus
         self._build_file_menu()
         self._build_image_menu()
-        self._build_exposure_menu()
         self._build_focus_menu()
+        self._build_exposure_menu()
+        self._build_whitebalance_menu()
 
         # main window area
         central = QWidget(self)
@@ -361,6 +390,26 @@ class MainWindow(QMainWindow):
         view_menu.addAction(self.v_scale)
         view_menu.addAction(self.v_crop)
 
+    def _build_focus_menu(self):
+        mb = self.menuBar()
+        focus_menu = mb.addMenu("Focus")
+        
+        self.af_action = QAction("Auto Focus", self, shortcut="Ctrl+F", checkable=True, triggered=self.auto_focus)
+        focus_menu.addAction(self.af_action)
+        
+        focus_menu.addSeparator()
+        focus_menu.addAction(
+            QAction("Run Auto Focus", self, shortcut="Ctrl+Shift+F", triggered=self.run_autofocus)
+        )
+
+        focus_menu.addSeparator()
+        focus_menu.addAction(
+            QAction("Increase Lens Position", self, shortcut="Ctrl+Shift+L", triggered=self.increase_lens_position)
+        )
+        focus_menu.addAction(
+            QAction("Decrease Lens Position", self, shortcut="Ctrl+L", triggered=self.decrease_lens_position)
+        )
+
     def _build_exposure_menu(self):
         mb = self.menuBar()
         exp_menu = mb.addMenu("Exposure")
@@ -388,27 +437,30 @@ class MainWindow(QMainWindow):
         exp_menu.addAction(
             QAction("Decrease Gain", self, shortcut="Ctrl+G", triggered=self.decrease_gain)
         )
-    
-    def _build_focus_menu(self):
+
+    def _build_whitebalance_menu(self):
         mb = self.menuBar()
-        focus_menu = mb.addMenu("Focus")
+        wb_menu = mb.addMenu("White Balance")
         
-        self.af_action = QAction("Auto Focus", self, shortcut="Ctrl+F", checkable=True, triggered=self.auto_focus)
-        focus_menu.addAction(self.af_action)
-        
-        focus_menu.addSeparator()
-        focus_menu.addAction(
-            QAction("Run Auto Focus", self, shortcut="Ctrl+R", triggered=self.run_autofocus)
+        self.awb_action = QAction("Auto White Balance", self, shortcut="Ctrl+W", checkable=True, triggered=self.auto_whitebalance)
+        wb_menu.addAction(self.awb_action)
+
+        wb_menu.addSeparator()
+        wb_menu.addAction(
+            QAction("Increase Red Gain", self, shortcut="Ctrl+Shift+R", triggered=self.increase_red_gain)
+        )
+        wb_menu.addAction(
+            QAction("Decrease Red Gain", self, shortcut="Ctrl+R", triggered=self.decrease_red_gain)
         )
 
-        focus_menu.addSeparator()
-        focus_menu.addAction(
-            QAction("Increase Lens Position", self, shortcut="Ctrl+Shift+L", triggered=self.increase_lens_position)
+        wb_menu.addSeparator()
+        wb_menu.addAction(
+            QAction("Increase Blue Gain", self, shortcut="Ctrl+Shift+B", triggered=self.increase_blue_gain)
         )
-        focus_menu.addAction(
-            QAction("Decrease Lens Position", self, shortcut="Ctrl+L", triggered=self.decrease_lens_position)
+        wb_menu.addAction(
+            QAction("Decrease Blue Gain", self, shortcut="Ctrl+B", triggered=self.decrease_blue_gain)
         )
-
+    
     def _build_top_left(self):
         self.tabw = QTabWidget(self)
         page1 = self._build_page1()

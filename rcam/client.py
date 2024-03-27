@@ -11,9 +11,20 @@ class RCamClient:
     def shutdown(self):
         self.api_sock.send_multipart([ApiCommands.SHUTDOWN, b''])
         
-    def set_size(self, width, height):
-        body = f"{width}x{height}".encode('utf-8')
-        self.api_sock.send_multipart([ApiCommands.SET_SIZE, body])
+    def auto_focus(self, state):
+        if state:
+            self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_ENABLE, b''])
+        else:
+            self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_DISABLE, b''])
+
+    def run_autofocus(self):
+        self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_RUN, b''])
+    
+    def increase_lens_position(self):
+        self.api_sock.send_multipart([ApiCommands.LENS_POSITION_INCREASE, b''])
+
+    def decrease_lens_position(self):
+        self.api_sock.send_multipart([ApiCommands.LENS_POSITION_DECREASE, b''])
 
     def auto_exposure(self, state):
         if state:
@@ -37,20 +48,27 @@ class RCamClient:
         body = ApiCommands.EXPOSURE_LOCKED if locked else ApiCommands.EXPOSURE_UNLOCKED
         self.api_sock.send_multipart([ApiCommands.EXPOSURE_TIME_DECREASE, body])
 
-    def auto_focus(self, state):
+    def auto_whitebalance(self, state):
         if state:
-            self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_ENABLE, b''])
+            self.api_sock.send_multipart([ApiCommands.AUTO_WHITE_BALANCE_ENABLE, b''])
         else:
-            self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_DISABLE, b''])
+            self.api_sock.send_multipart([ApiCommands.AUTO_WHITE_BALANCE_DISABLE, b''])
 
-    def run_autofocus(self):
-        self.api_sock.send_multipart([ApiCommands.AUTOFOCUS_RUN, b''])
-    
-    def increase_lens_position(self):
-        self.api_sock.send_multipart([ApiCommands.LENS_POSITION_INCREASE, b''])
+    def red_gain_increase(self):
+        self.api_sock.send_multipart([ApiCommands.RED_GAIN_INCREASE, b''])
+        
+    def red_gain_decrease(self):
+        self.api_sock.send_multipart([ApiCommands.RED_GAIN_DECREASE, b''])
 
-    def decrease_lens_position(self):
-        self.api_sock.send_multipart([ApiCommands.LENS_POSITION_DECREASE, b''])
+    def blue_gain_increase(self):
+        self.api_sock.send_multipart([ApiCommands.BLUE_GAIN_INCREASE, b''])
+        
+    def blue_gain_decrease(self):
+        self.api_sock.send_multipart([ApiCommands.BLUE_GAIN_DECREASE, b''])
+
+    def set_size(self, width, height):
+        body = f"{width}x{height}".encode('utf-8')
+        self.api_sock.send_multipart([ApiCommands.SET_SIZE, body])
 
     def fit_none(self):
         self.api_sock.send_multipart([ApiCommands.FIT_NONE, b''])
