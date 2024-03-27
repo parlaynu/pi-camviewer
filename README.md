@@ -66,7 +66,7 @@ image metadata displayed on the right.
 
 ![MainWindow](docs/main-window.png "Main Window")
 
-You can toggle between fitting the image by cropping and scaling. You can also manually adjust the exposure and 
+You can toggle between fitting the image by cropping and scaling. You can manually adjust the exposure and 
 if you have one of the v3 camera modules, you can also manually adjust the focus.
 
 The available controls are all accessible from the menus with shortcuts shown.
