@@ -1,4 +1,4 @@
-# PiCamera2 Based Viewer
+# RaspberryPi Remote Camera Viewer
 
 I needed a way to view images from a camera running on a remote and headless RaspberryPi. This is the tool
 built for that job.
@@ -61,16 +61,18 @@ Then run the viewer, passing it the URL to connect to. For example:
 
     $ ./rcam-viewer.py tcp://192.168.1.37:8089
 
-This displays the application as shown below. The image is shown in the main part of the window, with the
+This displays the application as shown below. The image is in the main part of the window, with the
 image metadata displayed on the right.
 
 ![MainWindow](docs/main-window.png "Main Window")
 
-You can toggle between fitting the image by cropping and scaling. You can also manually adjust the exposure and the
-focus (if you have one of the v3 camera modules). The controls are all available in the menus with shortcuts.
+You can toggle between fitting the image by cropping and scaling. You can also manually adjust the exposure and 
+if you have one of the v3 camera modules, you can also manually adjust the focus.
 
-There is also a histogram view. It generates the histogram based on the central window of the image. I find it 
-useful (sometimes) when manually setting the exposure,
+The available controls are all accessible from the menus with shortcuts shown.
+
+There is also a histogram view. It generates the histogram based on a central region of the image. I find it 
+useful (sometimes) when manually setting the exposure.
 
 ## Optional Setup
 
