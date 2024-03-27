@@ -43,6 +43,7 @@ class ApiServer(threading.Thread):
             ApiCommands.AUTOFOCUS_RUN: self.handle_af_run,
             ApiCommands.LENS_POSITION_INCREASE: self.handle_lp_increase,
             ApiCommands.LENS_POSITION_DECREASE: self.handle_lp_decrease,
+            ApiCommands.FIT_NONE: self.handle_fit_none,
             ApiCommands.FIT_SCALED: self.handle_fit_scaled,
             ApiCommands.FIT_CROPPED: self.handle_fit_cropped,
         }
@@ -186,12 +187,18 @@ class ApiServer(threading.Thread):
         }
         self.svr_sock.send_pyobj(controls)
 
+    def handle_fit_none(self, body):
+        controls = {
+            'FitMode': 'none'
+        }
+        self.svr_sock.send_pyobj(controls)
+    
     def handle_fit_scaled(self, body):
         controls = {
             'FitMode': 'scaled'
         }
         self.svr_sock.send_pyobj(controls)
-    
+
     def handle_fit_cropped(self, body):
         controls = {
             'FitMode': 'cropped'

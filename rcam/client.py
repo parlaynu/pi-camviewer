@@ -52,6 +52,9 @@ class RCamClient:
     def decrease_lens_position(self):
         self.api_sock.send_multipart([ApiCommands.LENS_POSITION_DECREASE, b''])
 
+    def fit_none(self):
+        self.api_sock.send_multipart([ApiCommands.FIT_NONE, b''])
+
     def fit_scaled(self):
         self.api_sock.send_multipart([ApiCommands.FIT_SCALED, b''])
 

@@ -25,6 +25,7 @@ class ApiCommands:
     LENS_POSITION_INCREASE = "lens_position_increase".encode('utf-8')
     LENS_POSITION_DECREASE = "lens_position_decrease".encode('utf-8')
     
+    FIT_NONE    = "fit_none".encode('utf-8')
     FIT_SCALED  = "fit_scaled".encode('utf-8')
     FIT_CROPPED = "fit_cropped".encode('utf-8')
 
