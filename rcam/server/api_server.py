@@ -121,6 +121,11 @@ class ApiServer(threading.Thread):
         if self.lens_position is None:
             return
 
+        controls = {
+            'LensPosition': self.lens_position*0.9
+        }
+        self.svr_sock.send_pyobj(controls)
+
     def handle_ae_enable(self, body):
         controls = {
             'AeEnable': True
