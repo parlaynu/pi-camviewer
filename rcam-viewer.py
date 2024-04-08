@@ -101,6 +101,10 @@ class Worker(QThread):
                 self.update_metadata.emit(idx, metadata)
             
             elif tag == PubSubCommands.JPEGIMG:
+                # only send one image at a time so as not to overwhelm the UI thread
+                #   with events. the UI thread sends the resume message when it is done.
+                self._paused = True
+
                 image_id = f'img-{idx:04d}'
             
                 jpeg = io.BytesIO(data)
@@ -123,7 +127,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, api_url, pub_url):
         super().__init__()
-        self.setWindowTitle("RaspberryAstro")
+        self.setWindowTitle("RaspberryCam")
         
         # build the interface
         self._build_interface()
@@ -183,6 +187,11 @@ class MainWindow(QMainWindow):
             self.redraw_image()
         else:
             self.redraw_histogram()
+        
+        # signal the worker to resume operation - it pauses itself 
+        #   when it sends an image so as not to overwhelm the UI thread
+        #   with events.
+        self.worker.resume()
     
     def redraw_image(self):
         # create the qimage
