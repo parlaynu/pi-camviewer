@@ -32,7 +32,7 @@ def Camera(camid, mode, *, vflip=False, hflip=False, preview=False, max_fps=0, e
         'buffer_count': 3,
         'colour_space': ColorSpace.Sycc(),
         'controls': {
-            'AwbMode': controls.AwbModeEnum.Daylight,
+            # 'AwbMode': controls.AwbModeEnum.Daylight,
             'NoiseReductionMode': controls.draft.NoiseReductionModeEnum.HighQuality,
         },
         'main': {
