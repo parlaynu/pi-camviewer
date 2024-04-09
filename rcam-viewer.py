@@ -35,7 +35,8 @@ class Worker(QThread):
         QThread.__init__(self, parent)
         # initial state
         self._over = False
-        self._paused = True
+        self._paused = False
+        self._holding = False
 
         # connect to the publisher
         self.pub_url = pub_url
@@ -56,6 +57,8 @@ class Worker(QThread):
         self.size_msg = "size".encode('utf-8')
         self.pause_msg = "pause".encode('utf-8')
         self.resume_msg = "resume".encode('utf-8')
+        self.hold_msg = "hold".encode('utf-8')
+        self.release_msg = "release".encode('utf-8')
         
     def run(self):
         poller = zmq.Poller()
@@ -85,12 +88,18 @@ class Worker(QThread):
         
         elif tag == self.resume_msg:
             self._paused = False
+        
+        elif tag == self.hold_msg:
+            self._holding = True
+
+        elif tag == self.release_msg:
+            self._holding = False
     
     def _handle_sub(self):
             tag, idx, data = self.sub_sock.recv_multipart()
             
             # if we're paused, receive the message but do nothing with it
-            if self._paused:
+            if self._paused or self._holding:
                 return
 
             # not paused, so handle the message
@@ -103,7 +112,7 @@ class Worker(QThread):
             elif tag == PubSubCommands.JPEGIMG:
                 # only send one image at a time so as not to overwhelm the UI thread
                 #   with events. the UI thread sends the resume message when it is done.
-                self._paused = True
+                self._holding = True
 
                 image_id = f'img-{idx:04d}'
             
@@ -118,9 +127,15 @@ class Worker(QThread):
         
     def pause(self):
         self.sender.send_multipart([self.pause_msg, b'', b''])
-    
+
     def resume(self):
         self.sender.send_multipart([self.resume_msg, b'', b''])
+
+    def hold(self):
+        self.sender.send_multipart([self.hold_msg, b'', b''])
+
+    def release(self):
+        self.sender.send_multipart([self.release_msg, b'', b''])
 
 
 class MainWindow(QMainWindow):
@@ -188,10 +203,10 @@ class MainWindow(QMainWindow):
         else:
             self.redraw_histogram()
         
-        # signal the worker to resume operation - it pauses itself 
+        # signal the worker to release operation - it holds 
         #   when it sends an image so as not to overwhelm the UI thread
         #   with events.
-        self.worker.resume()
+        self.worker.release()
     
     def redraw_image(self):
         # create the qimage

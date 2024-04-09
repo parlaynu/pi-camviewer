@@ -49,14 +49,14 @@ def capture(pipe, camera, arrays):
         item['metadata']['CameraModel'] = camera.camera_properties['Model']
         item['metadata']['ImageSize'] = camera.camera_config['main']['size']
         
-    
-        item['main'] = {
-            'image': images[0],
-            'format': camera.camera_config['main']['format'],
-            'framesize': camera.camera_config['main']['framesize'],
-            'size': camera.camera_config['main']['size'],
-            'stride': camera.camera_config['main']['stride']
-        }
+        for idx, array in enumerate(arrays):
+            item[array] = {
+                'image': images[idx],
+                'format': camera.camera_config[array]['format'],
+                'framesize': camera.camera_config[array]['framesize'],
+                'size': camera.camera_config[array]['size'],
+                'stride': camera.camera_config[array]['stride']
+            }
 
         yield item
 
