@@ -78,8 +78,9 @@ useful (sometimes) when manually setting the exposure.
 
 ### Pi Hotspot
 
-I often use this where this no wifi network so I have setup the wifi on the Pi to be a hotspot. When I'm at home,
-I connect the Pi to my network using the wired interface, but out and about, I connect my laptop to the hotspot.
+I often use this where this no wifi network, such as outdoors getting camera parameters for astro-photography, so 
+I have setup the wifi on the Pi to be a hotspot. When I'm at home, I connect the Pi to my network using the wired 
+interface, but out and about, I connect my laptop to the hotspot.
 
 It's very easy to do with network manager as described
 [here](https://www.raspberrypi.com/documentation/computers/configuration.html#host-a-wireless-network-on-your-raspberry-pi)
