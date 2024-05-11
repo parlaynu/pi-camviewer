@@ -63,14 +63,19 @@ def capture(pipe, camera, arrays):
 
 def focus(pipe, camera):
     
-    # start in autofocus mode and trigger a focus run
-    ctrls = {
-        'AfMode': controls.AfModeEnum.Auto,
-        'AfTrigger': controls.AfTriggerEnum.Start
-    }
-    camera.set_controls(ctrls)
+    # check if focus is supported
+    mdata = camera.capture_metadata()
+    can_focus = 'AfMode' in mdata
     
-    af_enable = True
+    # start in autofocus mode and trigger a focus run
+    if can_focus:
+        ctrls = {
+            'AfMode': controls.AfModeEnum.Auto,
+            'AfTrigger': controls.AfTriggerEnum.Start
+        }
+        camera.set_controls(ctrls)
+    
+    af_enable = can_focus
     
     for item in pipe:
         ctrls = item['controls']
@@ -92,12 +97,13 @@ def focus(pipe, camera):
             local_ctrls['AfMode'] = controls.AfModeEnum.Manual
             local_ctrls['LensPosition'] = lp
         
-        if len(local_ctrls):
+        if can_focus and len(local_ctrls):
             camera.set_controls(local_ctrls)
             
         # insert the AfEnable item into the metadata
-        metadata = item['metadata']
-        metadata['AfEnable'] = af_enable
+        if can_focus:
+            metadata = item['metadata']
+            metadata['AfEnable'] = af_enable
         
         yield item
 
