@@ -188,10 +188,11 @@ class ApiServer(threading.Thread):
         self.svr_sock.send_pyobj(controls)
 
 
-        controls = {
-            'LensPosition': self.lens_position*0.9
-        }
-        self.svr_sock.send_pyobj(controls)
+        if self.lens_position is not None:
+            controls = {
+                'LensPosition': self.lens_position*0.9
+            }
+            self.svr_sock.send_pyobj(controls)
 
     def handle_awb_enable(self, body):
         controls = {
