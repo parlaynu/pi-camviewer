@@ -8,7 +8,7 @@ from .commands import ApiCommands, PubSubCommands
 
 
 class Server:
-    def __init__(self, context, api_url, pub_url, *, camera_id, mode, max_fps, exposure_time, analogue_gain, hflip, vflip, preview):
+    def __init__(self, context, api_url, pub_url, *, camera_id, mode, max_fps, exposure_time, analogue_gain, hflip, vflip, preview, tuning_file):
 
         svr_sockname = str(uuid.uuid4())
         
@@ -20,7 +20,8 @@ class Server:
             hflip=hflip,
             exposure_time=exposure_time,
             analogue_gain=analogue_gain,
-            preview=preview
+            preview=preview,
+            tuning_file=tuning_file
         )
         if preview:
             cam.start_preview_()

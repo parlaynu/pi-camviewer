@@ -12,9 +12,23 @@ except:
     pass
 
 
-def Camera(camid, mode, *, vflip=False, hflip=False, preview=False, max_fps=0, exposure_time=0, analogue_gain=0.0):
+def Camera(
+    camid, 
+    mode, 
+    *, 
+    vflip=False, 
+    hflip=False, 
+    preview=False, 
+    max_fps=0, 
+    exposure_time=0, 
+    analogue_gain=0.0,
+    tuning_file=None,
+):
 
-    cam = Picamera2(camid)
+    # check for tuning file override
+    tuning = None if tuning_file is None else Picamera2.load_tuning_file(tuning_file)
+
+    cam = Picamera2(camid, tuning=tuning)
 
     sensor_mode = cam.sensor_modes[mode]
     sensor_format = sensor_mode['unpacked']

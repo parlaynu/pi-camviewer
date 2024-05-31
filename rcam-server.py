@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--hflip', help='flip the image horizontally', action='store_true')
     parser.add_argument('--vflip', help='flip the image vertically', action='store_true')
     parser.add_argument('--preview', help='run the camera preview on attached monitor', action='store_true')
+    parser.add_argument('--tuning-file', help='specify a tuning file override', type=str, default=None)
     args = parser.parse_args()
     
     api_url = f"tcp://0.0.0.0:{args.api_port}"
