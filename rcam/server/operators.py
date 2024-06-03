@@ -65,7 +65,7 @@ def focus(pipe, camera):
     
     # check if focus is supported
     mdata = camera.capture_metadata()
-    can_focus = 'AfMode' in mdata
+    can_focus = mdata.get('AfState', False) or mdata.get('AfMode', False)
     
     # start in autofocus mode and trigger a focus run
     if can_focus:
@@ -99,7 +99,7 @@ def focus(pipe, camera):
         
         if can_focus and len(local_ctrls):
             camera.set_controls(local_ctrls)
-            
+        
         # insert the AfEnable item into the metadata
         if can_focus:
             metadata = item['metadata']
