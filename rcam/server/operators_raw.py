@@ -33,6 +33,8 @@ image_dtypes = {
 
 
 def raw_gamma8(pipe):
+    
+    scale = 255.0 / np.power(65535, 1.0/2.2)
 
     for item in pipe:
         image = item['raw']['image']
@@ -54,7 +56,7 @@ def raw_gamma8(pipe):
         image = cv2.demosaicing(image.astype(np.uint16), bayer_code)
         
         # apply the gamma encoding and convert to 8bit range
-        image = np.power(image, 1.0/2.2) / np.power(65535, 1.0/2.2) * 255
+        image = np.power(image, 1.0/2.2) * scale
         image = image.astype(np.uint8)
 
         # store the image back in the item
