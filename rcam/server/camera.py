@@ -53,6 +53,10 @@ def Camera(
             'size': sensor_size,
             'format': 'BGR888'  # is actually RGB
         },
+        'raw': {
+            'size': sensor_size,
+            'format': str(sensor_format)
+        },
         'queue': False
     }
 

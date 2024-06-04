@@ -8,7 +8,7 @@ from .commands import ApiCommands, PubSubCommands
 
 
 class Server:
-    def __init__(self, context, api_url, pub_url, *, camera_id, mode, max_fps, exposure_time, analogue_gain, hflip, vflip, preview, tuning_file):
+    def __init__(self, context, api_url, pub_url, *, camera_id, mode, max_fps, exposure_time, analogue_gain, hflip, vflip, preview, tuning_file, dtype):
 
         svr_sockname = str(uuid.uuid4())
         
@@ -31,7 +31,8 @@ class Server:
 
         self.pub_svr = PubServer(context, pub_url, svr_sockname,
             camera=cam,
-            ae_enabled=(exposure_time == 0)
+            ae_enabled=(exposure_time == 0),
+            dtype=dtype
         )
         self.api_svr = ApiServer(context, api_url, svr_sockname,
                 min_ag=min_ag,

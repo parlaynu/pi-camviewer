@@ -18,6 +18,9 @@ def main():
     parser.add_argument('--vflip', help='flip the image vertically', action='store_true')
     parser.add_argument('--preview', help='run the camera preview on attached monitor', action='store_true')
     parser.add_argument('--tuning-file', help='specify a tuning file override', type=str, default=None)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--rl8', help='send raw linear 8bit image', action='store_true')
+    group.add_argument('--rg8', help='send raw gamma encoded 8bit image', action='store_true')
     args = parser.parse_args()
     
     api_url = f"tcp://0.0.0.0:{args.api_port}"
@@ -30,6 +33,11 @@ def main():
     kwargs = vars(args)
     del kwargs['api_port']
     
+    dtype = 'rl8' if args.rl8 else 'rg8' if args.rg8 else 'rgb'
+    del kwargs['rl8']
+    del kwargs['rg8']
+    kwargs['dtype'] = dtype
+        
     context = zmq.Context()
     svr = Server(context, api_url, pub_url, **kwargs)
     svr.start()

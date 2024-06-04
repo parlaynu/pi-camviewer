@@ -3,12 +3,13 @@ import threading
 import zmq
 
 from .operators import control, capture, jpeg_encoder, publisher
-from .operators import focus, exposure, colour
+from .operators import focus, exposure, whitebalance
 from .operators import fit_scaled, fit_cropped
+from .operators_raw import raw_linear8, raw_gamma8
 
 
 class PubServer(threading.Thread):
-    def __init__(self, context, pub_url, svr_sockname, *, camera, ae_enabled):
+    def __init__(self, context, pub_url, svr_sockname, *, camera, ae_enabled, dtype):
         super().__init__()
 
         self.pub_sock = context.socket(zmq.PUB)
@@ -19,8 +20,11 @@ class PubServer(threading.Thread):
         self.svr_sock.connect(f"inproc://{svr_sockname}")
         
         self.ae_enabled = ae_enabled
+        self.dtype = dtype
         
         self.arrays = arrays = ["main"]
+        if self.dtype != 'rgb':
+            self.arrays.append("raw")
         self.camera = camera
         
     def run(self):
@@ -32,7 +36,13 @@ class PubServer(threading.Thread):
         pipe = capture(pipe, self.camera, self.arrays)
         pipe = focus(pipe, self.camera)
         pipe = exposure(pipe, self.camera)
-        pipe = colour(pipe, self.camera)
+        pipe = whitebalance(pipe, self.camera)
+        
+        if self.dtype == 'rl8':
+            pipe = raw_linear8(pipe)
+        elif self.dtype == 'rg8':
+            pipe = raw_gamma8(pipe)
+        
         pipe = fit_cropped(pipe, enabled=False)
         pipe = fit_scaled(pipe, enabled=True)
         pipe = jpeg_encoder(pipe)

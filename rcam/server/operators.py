@@ -47,7 +47,9 @@ def capture(pipe, camera, arrays):
         # build the item to yield
         item['metadata'] = metadata
         item['metadata']['CameraModel'] = camera.camera_properties['Model']
-        item['metadata']['ImageSize'] = camera.camera_config['main']['size']
+        
+        image_key = 'raw' if 'raw' in item else 'main'
+        item['metadata']['ImageSize'] = camera.camera_config[image_key]['size']
         
         for idx, array in enumerate(arrays):
             item[array] = {
@@ -108,7 +110,7 @@ def focus(pipe, camera):
         yield item
 
 
-def colour(pipe, camera):
+def whitebalance(pipe, camera):
     local_keys = {'AwbEnable', 'ColourGains'}
     
     awb_enable = True
@@ -150,7 +152,8 @@ def exposure(pipe, camera):
 def jpeg_encoder(pipe):
     
     for item in pipe:
-        image = item['main']['image']
+        image_key = 'raw' if 'raw' in item else 'main'
+        image = item[image_key]['image']
 
         image = Image.fromarray(image)
         
@@ -232,7 +235,8 @@ def fit_cropped(pipe, *, enabled):
         set_crop_h = controls.get('Height', set_crop_h)
 
         if enabled:
-            image = item['main']['image']
+            image_key = 'raw' if 'raw' in item else 'main'
+            image = item[image_key]['image']
             image_h, image_w, _ = image.shape
         
             crop_w, crop_h = min(image_w, set_crop_w), min(image_h, set_crop_h)
@@ -240,7 +244,7 @@ def fit_cropped(pipe, *, enabled):
             if crop_w < image_w or crop_h < image_h:
                 x0, x1 = int((image_w - crop_w)/2), int((image_w + crop_w)/2)
                 y0, y1 = int((image_h - crop_h)/2), int((image_h + crop_h)/2)
-                item['main']['image'] = image[y0:y1, x0:x1, :]
+                item[image_key]['image'] = image[y0:y1, x0:x1, :]
 
         yield item
 
@@ -263,13 +267,14 @@ def fit_scaled(pipe, *, enabled):
         set_scale_h = controls.get('Height', set_scale_h)
 
         if enabled:
-            image = item['main']['image']
+            image_key = 'raw' if 'raw' in item else 'main'
+            image = item[image_key]['image']
             image_h, image_w, _ = image.shape
         
             scale_w, scale_h = min(image_w, set_scale_w), min(image_h, set_scale_h)
             if scale_w < image_w or scale_h < image_h:
                 # preserve image aspect ratio
                 scale = min(scale_w/image_w, scale_h/image_h)
-                item['main']['image'] = cv2.resize(image, None, fx=scale, fy=scale)
+                item[image_key]['image'] = cv2.resize(image, None, fx=scale, fy=scale)
 
         yield item
