@@ -20,18 +20,6 @@ bayer_scale = {
     'SRGGB16': 1.0,
 }
 
-image_dtypes = {
-    'RGB888': np.uint8,
-    'BGR888': np.uint8,
-    'SBGGR10': np.uint16,
-    'SBGGR12': np.uint16,
-    'SBGGR16': np.uint16,
-    'SGRBG16': np.uint16,
-    'SGBRG16': np.uint16,
-    'SRGGB16': np.uint16,
-}
-
-
 def raw_gamma8(pipe):
     
     scale = 255.0 / np.power(65535, 1.0/2.2)
@@ -39,10 +27,6 @@ def raw_gamma8(pipe):
     for item in pipe:
         image = item['raw']['image']
         image_format = item['raw']['format']
-        
-        # cast the image to the correct type
-        image_dtype = image_dtypes[image_format]
-        image = image.view(image_dtype)
         
         # scale the image up to the top part of the 16bit word
         image = image * bayer_scale[image_format]
@@ -73,10 +57,6 @@ def raw_linear8(pipe):
         image = item['raw']['image']
         image_format = item['raw']['format']
 
-        # cast the image to the correct type
-        image_dtype = image_dtypes[image_format]
-        image = image.view(image_dtype)
-        
         # scale the image up to the top part of the 16bit word
         image = image * bayer_scale[image_format]
 

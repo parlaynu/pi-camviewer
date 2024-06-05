@@ -5,6 +5,7 @@ import io
 import zmq
 
 from PIL import Image
+import numpy as np
 
 try:
     from libcamera import controls
@@ -14,6 +15,18 @@ except:
 from .commands import PubSubCommands
 
 
+image_dtypes = {
+    'RGB888': np.uint8,
+    'BGR888': np.uint8,
+    'SBGGR10': np.uint16,
+    'SBGGR12': np.uint16,
+    'SBGGR16': np.uint16,
+    'SGRBG16': np.uint16,
+    'SGBRG16': np.uint16,
+    'SRGGB16': np.uint16,
+}
+
+
 def control(svr_socket):
     
     for idx in count():
@@ -21,7 +34,6 @@ def control(svr_socket):
             'idx': idx,
             'controls': {}
         }
-
         while True:
             ev = svr_socket.poll(timeout=0, flags=zmq.POLLIN)
             if ev == 0:
@@ -38,10 +50,8 @@ def capture(pipe, camera, arrays):
 
     # start the main loop
     for item in pipe:
-        # wait for the current capture
+        # handle the capture
         images, metadata = camera.wait(job)
-
-        # launch the next capture
         job = camera.capture_arrays(arrays, wait=False)
 
         # build the item to yield
@@ -52,8 +62,11 @@ def capture(pipe, camera, arrays):
         item['metadata']['ImageSize'] = camera.camera_config[image_key]['size']
         
         for idx, array in enumerate(arrays):
+            image_format = camera.camera_config[array]['format']
+            image_dtype = image_dtypes[image_format]
+            
             item[array] = {
-                'image': images[idx],
+                'image': images[idx].view(image_dtype),
                 'format': camera.camera_config[array]['format'],
                 'framesize': camera.camera_config[array]['framesize'],
                 'size': camera.camera_config[array]['size'],
